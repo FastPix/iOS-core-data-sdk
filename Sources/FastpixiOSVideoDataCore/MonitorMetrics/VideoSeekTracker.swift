@@ -42,7 +42,6 @@ public  class VideoSeekTracker {
             self.dispatchNucleusEvent.isVideoSeeking = true
             self.captureSeekStartTime = viewerTimestamp
             self.dispatchNucleusEvent.data["view_seek_count"] = (self.dispatchNucleusEvent.data["view_seek_count"] as? Int ?? 0) + 1
-            self.dispatchNucleusEvent.data["player_playhead_position"] = self.dispatchNucleusEvent.getCurrentPlayheadTime()
             self.dispatchNucleusEvent.filterData(eventName: "seeking")
         }
     }

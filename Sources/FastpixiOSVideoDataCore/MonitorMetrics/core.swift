@@ -50,32 +50,32 @@ public class NucleusState {
     ]
     
     public init(key: String, passableMetadata: [String: Any], fetchPlayheadTime: @escaping () -> Int,
-                fetchVideoState: @escaping () -> [String:Any]) {
-        self.key = key
-        self.metadata = passableMetadata["data"] as! [String : Any]
-        self.utilMethods = commonMethods
-        self.getVideoData = fetchVideoState
-        self.getCurrentPlayheadTime = fetchPlayheadTime
-        self.playerInitializationTime = commonMethods.now()
-        self.isVideoPlaying = false
-        self.isVideoBuffering = false
-        self.isVideoSeeking = false
-        self.isVideoErrorOccured = false
-        self.playerDestroyed = false
-        self.data = [
-            "player_sequence_number": 1,
-            "view_sequence_number": 1,    
-            "player_instance_id": commonMethods.getUUID().lowercased(),  
-            "beacon_domain": (passableMetadata["configDomain"] as? String) ?? "metrix.ws",  
-            "workspace_id": (self.metadata["workspace_id"] as? String) ?? "workspaceId"  
-        ]
+                    fetchVideoState: @escaping () -> [String:Any]) {
+            self.key = key
+            self.metadata = passableMetadata["data"] as! [String : Any]
+            self.utilMethods = commonMethods
+            self.getVideoData = fetchVideoState
+            self.getCurrentPlayheadTime = fetchPlayheadTime
+            self.playerInitializationTime = commonMethods.now()
+            self.isVideoPlaying = false
+            self.isVideoBuffering = false
+            self.isVideoSeeking = false
+            self.isVideoErrorOccured = false
+            self.playerDestroyed = false
+            self.data = [
+                "player_sequence_number": 1,
+                "view_sequence_number": 1,
+                "player_instance_id": commonMethods.getUUID().lowercased(),
+                "beacon_domain": (passableMetadata["configDomain"] as? String) ?? "metrix.ws",
+                "workspace_id": (self.metadata["workspace_id"] as? String) ?? "workspaceId"
+            ]
 
-        self.lastCheckedEventTime = 0
-        self.dispatchEvent(event: "configureView", eventmetadata: [:])
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(appWillTerminate), name: UIApplication.willTerminateNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(appWillTerminate), name: UIScreen.didDisconnectNotification, object: nil)
-    }
+            self.lastCheckedEventTime = 0
+            self.dispatchEvent(event: "configureView", eventmetadata: [:])
+            
+            NotificationCenter.default.addObserver(self, selector: #selector(appWillTerminate), name: UIApplication.willTerminateNotification, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(appWillTerminate), name: UIScreen.didDisconnectNotification, object: nil)
+        }
     
     func emitEvents(event: String, eventmetadata: [String: Any]) {
         let currentTime = commonMethods.now()
@@ -98,6 +98,10 @@ public class NucleusState {
             initializeView()
         }
         
+        if event == "variantChanged" {
+            self.data["video_source_bitrate"] = eventmetadata["video_source_bitrate"] ?? self.data["video_source_bitrate"]
+        }
+
         playbackFailureHandler.processEvent(nucleusState: self, metadata: eventmetadata)
         seekingHandler.processEvent(nucleusState: self)
         requestMetricsHandler.processEvent(nucleusState: self, metadata: eventmetadata)
@@ -163,7 +167,6 @@ public class NucleusState {
     }
     
     func appendVideoState() {
-        self.data.merge(self.getVideoData()) { (_, new) in new }
         self.data["player_playhead_time"] = self.getCurrentPlayheadTime()
         self.validateData()
     }
@@ -171,10 +174,7 @@ public class NucleusState {
     func validateData() {
         let numericalKeys = [
             "player_width",
-            "player_height",
-            "video_source_width",
-            "video_source_height",
-            "video_source_bitrate"
+            "player_height"
         ]
         
         let urlKeys = ["player_source_url", "video_source_url"]
@@ -213,7 +213,6 @@ public class NucleusState {
         }
         
         let updatedData = self.data
-        
         playbackEventHandler.sendData(event: eventName, eventAttr: updatedData)
         
         self.data["view_sequence_number"] = (self.data["view_sequence_number"] as? Int ?? 0) + 1

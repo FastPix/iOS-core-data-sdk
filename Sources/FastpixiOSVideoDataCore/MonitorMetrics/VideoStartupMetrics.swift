@@ -43,7 +43,6 @@ public  class VideoStartupMetricsHandler {
             }
             
             viewTimeToFirstFrame = self.dispatchNucleusEvent.data["view_time_to_first_frame"] as? Int ?? 0
-            print("The video start up time",viewTimeToFirstFrame)
         }
     }
 }

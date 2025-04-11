@@ -39,7 +39,6 @@ public  class VideoBufferProcessor {
         if self.viewBufferStarTime == 0 {  // Buffering just started
             let getViewBufferCount = self.dispatchNucleusEvent.data["view_rebuffer_count"] as? Int ?? 0
             self.dispatchNucleusEvent.data["view_rebuffer_count"] = getViewBufferCount + 1
-            print("The rebuffer count is : \(getViewBufferCount + 1)")
             self.viewBufferStarTime = timestamp
         }
     }

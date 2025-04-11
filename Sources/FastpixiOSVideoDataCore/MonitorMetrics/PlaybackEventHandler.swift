@@ -54,7 +54,6 @@ public  class PlybackPulseHadler {
     }
     
     public func sendData(event: String, eventAttr: [String: Any]) {
-        
         if  eventAttr["view_id"] != nil {
             let sessionData = FastPixUserDefaults.updateCookies()
             let deviceDetails = [
@@ -84,7 +83,12 @@ public  class PlybackPulseHadler {
                     "viewer_connection_type": getConnectionType()
                 ]
             )
-            let cloneBeaconObj = cloneBeaconData(eventName: event, dataObj: mergedData) ?? [:]
+            var cloneBeaconObj = cloneBeaconData(eventName: event, dataObj: mergedData) ?? [:]
+            if event == "variantChanged" {
+                cloneBeaconObj["video_source_bitrate"] = eventAttr["video_source_bitrate"]
+                cloneBeaconObj["video_source_height"] = eventAttr["video_source_height"] ?? self.previousBeaconData?["video_source_height"]
+                cloneBeaconObj["video_source_width"] = eventAttr["video_source_width"] ?? self.previousBeaconData?["video_source_width"]
+            }
             let formattedEvent = ConvertEventNamesToKeys.formatEventData(cloneBeaconObj)
             
             if (self.tokenId != nil) {
@@ -296,14 +300,6 @@ public  class PlybackPulseHadler {
                     }
                 }
             }
-            
-            if eventName == "variantChanged" {
-                for (key, value) in dataObj {
-                    if key.hasPrefix("video_source") {
-                        clonedObj[key] = value
-                    }
-                }
-            }
             previousBeaconData = clonedObj
         }
         if eventName == "viewCompleted" {
@@ -313,6 +309,7 @@ public  class PlybackPulseHadler {
                     updatedClonedObj.removeValue(forKey: param) // Remove the key if it exists
                 }
             }
+            updatedClonedObj["player_playhead_time"] = self.dispatchNucleusEvent.getCurrentPlayheadTime()
             return updatedClonedObj
         }
         return clonedObj
