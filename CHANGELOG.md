@@ -2,12 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.3]
+- Implemented deinit to remove notification observers when the player is deinitialized, ensuring proper resource cleanup.
+
 ## [1.0.2]
 - Fixed video_source_bitrate in variantChanged events.
 - Fixed event transition calculations .
 
 ## [1.0.1]
-- Bug fixes and maintenance updates.
+- Fixed bugs and improved the accuracy of metrics parameter calculations during event transitions.
 
 ## [1.0.0]
 

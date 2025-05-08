@@ -50,32 +50,32 @@ public class NucleusState {
     ]
     
     public init(key: String, passableMetadata: [String: Any], fetchPlayheadTime: @escaping () -> Int,
-                    fetchVideoState: @escaping () -> [String:Any]) {
-            self.key = key
-            self.metadata = passableMetadata["data"] as! [String : Any]
-            self.utilMethods = commonMethods
-            self.getVideoData = fetchVideoState
-            self.getCurrentPlayheadTime = fetchPlayheadTime
-            self.playerInitializationTime = commonMethods.now()
-            self.isVideoPlaying = false
-            self.isVideoBuffering = false
-            self.isVideoSeeking = false
-            self.isVideoErrorOccured = false
-            self.playerDestroyed = false
-            self.data = [
-                "player_sequence_number": 1,
-                "view_sequence_number": 1,
-                "player_instance_id": commonMethods.getUUID().lowercased(),
-                "beacon_domain": (passableMetadata["configDomain"] as? String) ?? "metrix.ws",
-                "workspace_id": (self.metadata["workspace_id"] as? String) ?? "workspaceId"
-            ]
+                fetchVideoState: @escaping () -> [String:Any]) {
+        self.key = key
+        self.metadata = passableMetadata["data"] as! [String : Any]
+        self.utilMethods = commonMethods
+        self.getVideoData = fetchVideoState
+        self.getCurrentPlayheadTime = fetchPlayheadTime
+        self.playerInitializationTime = commonMethods.now()
+        self.isVideoPlaying = false
+        self.isVideoBuffering = false
+        self.isVideoSeeking = false
+        self.isVideoErrorOccured = false
+        self.playerDestroyed = false
+        self.data = [
+            "player_sequence_number": 1, 
+            "view_sequence_number": 1,
+            "player_instance_id": commonMethods.getUUID().lowercased(),
+            "beacon_domain": (passableMetadata["configDomain"] as? String) ?? "metrix.ws",
+            "workspace_id": (self.metadata["workspace_id"] as? String) ?? "workspaceId"
+        ]
 
-            self.lastCheckedEventTime = 0
-            self.dispatchEvent(event: "configureView", eventmetadata: [:])
-            
-            NotificationCenter.default.addObserver(self, selector: #selector(appWillTerminate), name: UIApplication.willTerminateNotification, object: nil)
-            NotificationCenter.default.addObserver(self, selector: #selector(appWillTerminate), name: UIScreen.didDisconnectNotification, object: nil)
-        }
+        self.lastCheckedEventTime = 0
+        self.dispatchEvent(event: "configureView", eventmetadata: [:])
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(appWillTerminate), name: UIApplication.willTerminateNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(appWillTerminate), name: UIScreen.didDisconnectNotification, object: nil)
+    }
     
     func emitEvents(event: String, eventmetadata: [String: Any]) {
         let currentTime = commonMethods.now()
@@ -245,7 +245,15 @@ public class NucleusState {
     func emitPulse() {
         dispatchEvent(event: "pulse", eventmetadata: [:])
     }
-    
+
+    deinit {
+        // Remove observer for app termination to avoid potential retain cycles or memory leaks
+        NotificationCenter.default.removeObserver(self, name: UIApplication.willTerminateNotification, object: nil)
+        
+        // Remove observer for screen disconnection
+        NotificationCenter.default.removeObserver(self, name: UIScreen.didDisconnectNotification, object: nil)
+    }
+
     func refreshViewData() {
         self.data.keys.forEach { key in
             if key.hasPrefix("view_") {
