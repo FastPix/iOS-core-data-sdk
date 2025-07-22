@@ -58,8 +58,7 @@ public  class PlybackPulseHadler {
                 "os_name": getOSName()   ,
                 "browser_version": getAppVersion(),
                 "browser": getAppName(),
-                "video_source_type": "application/x-mpegurl",
-                "player_is_fullscreen": "true"
+                "device_category": getDeviceCategory()
             ]
             var fetchedVideoState : [String : Any] = [:]
             if (event != "viewCompleted") {
@@ -113,6 +112,19 @@ public  class PlybackPulseHadler {
             }
         }
         return connectionType
+    }
+
+    public func getDeviceCategory() -> String {
+        
+        switch UIDevice.current.userInterfaceIdiom {
+        case .phone: return "Mobile"
+        case .pad: return "iPad"
+        case .tv: return "Apple TV"
+        case .carPlay: return "CarPlay"
+        case .mac: return "MacBook"
+        default: return "Unknown"
+        }
+        
     }
     
     public func getAppVersion() -> String {
@@ -254,7 +266,17 @@ public  class PlybackPulseHadler {
             "iPhone2,1": "iPhone 3GS",
             
             // Original iPhone (2007)
-            "iPhone1,1": "iPhone (1st generation)"
+            "iPhone1,1": "iPhone (1st generation)",
+
+            // Apple TV
+             "AppleTV2,1": "Apple TV (2nd generation)",
+             "AppleTV3,1": "Apple TV (3rd generation)",
+             "AppleTV3,2": "Apple TV (3rd generation, Rev A)",
+             "AppleTV5,3": "Apple TV HD",
+             "AppleTV6,2": "Apple TV 4K",
+             "AppleTV11,1": "Apple TV 4K (2nd generation)",
+             "AppleTV14,1": "Apple TV 4K (3rd generation, Wi-Fi)",
+             "AppleTV14,2": "Apple TV 4K (3rd generation, Wi-Fi + Ethernet)"
         ]
         
         return deviceMap[identifier] ?? identifier // Return the identifier if not found

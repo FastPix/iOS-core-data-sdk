@@ -10,6 +10,7 @@
 - **Error Management:** Identify and resolve playback failures quickly with detailed error reports.
 - **Customizable Tracking:** Flexible configuration to match your specific monitoring needs.
 - **Centralized Dashboard:** Visualize and compare metrics on the [FastPix dashboard](https://dashboard.fastpix.io) to make data-driven decisions.
+- **Compatible with tvOS:** Monitor and track video playback and analytics specifically on Apple TV, just like on iOS.
 
 # Step 1: Installation and Setup:
 
