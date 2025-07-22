@@ -3,8 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [1.0.4]
-- Added support for tvOS, enabling all existing features — including engagement tracking, playback quality monitoring, error reporting, and custom metadata — on Apple TV.
-- Enhanced device details parameters to accurately capture and report tvOS-specific device information alongside existing metrics.
+- Added support for tvOS, enabling all existing features including engagement tracking, playback quality monitoring, error reporting, and custom metadata on Apple TV.
+- Enhanced device details parameters to accurately capture and report tvOS specific device information alongside existing metrics.
 
 ## [1.0.3]
 - Implemented deinit to remove notification observers when the player is deinitialized, ensuring proper resource cleanup.
