@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.5]
+- Updated the SDK’s default metrics collection domain to improve endpoint reliability and alignment with current infrastructure.
+- Explicitly configured custom domains continue to be respected.
+
 ## [1.0.4]
 - Added support for tvOS, enabling all existing features including engagement tracking, playback quality monitoring, error reporting, and custom metadata on Apple TV.
 - Enhanced device details parameters to accurately capture and report tvOS specific device information alongside existing metrics.

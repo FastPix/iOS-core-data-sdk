@@ -366,7 +366,7 @@ public  class PlybackPulseHadler {
     }
     
     public func formulateBeaconUrl(workspace: String, config: [String: Any], customDomain: String? = nil, customScheme: String = "https") -> String {
-        let beaconDomain = customDomain ?? config["beaconDomain"] as? String ?? "metrix.ws"
+        let beaconDomain = customDomain ?? config["beaconDomain"] as? String ?? "anlytix.io"
         let finalWorkspace = workspace.isEmpty ? "workspaceId" : workspace
         return "\(customScheme)://\(finalWorkspace).\(beaconDomain)"
     }
