@@ -66,7 +66,7 @@ public class NucleusState {
             "player_sequence_number": 1, 
             "view_sequence_number": 1,
             "player_instance_id": commonMethods.getUUID().lowercased(),
-            "beacon_domain": (passableMetadata["configDomain"] as? String) ?? "anlytix.io",
+            "beacon_domain": (passableMetadata["beaconDomain"] as? String) ?? "anlytix.io",
             "workspace_id": (self.metadata["workspace_id"] as? String) ?? "workspaceId"
         ]
 
