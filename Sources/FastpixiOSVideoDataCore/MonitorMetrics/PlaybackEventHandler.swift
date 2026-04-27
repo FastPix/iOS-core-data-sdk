@@ -9,6 +9,7 @@ public  class PlybackPulseHadler {
     public var dispatchNucleusEvent: NucleusState
     public var tokenId: String?
     public var actionableData: [String: Any]?
+    public var sdkDetails: [String: Any]
     public var userData: [String: Any]
     public var previousBeaconData: [String: Any]?
     public var previousVideoState: [String: Any] = [:]
@@ -40,9 +41,13 @@ public  class PlybackPulseHadler {
     
     public init(nucleusState: NucleusState) {
         self.dispatchNucleusEvent = nucleusState
-        self.actionableData = nucleusState.metadata
+        self.actionableData = nucleusState.passableMetadata
         self.tokenId = nucleusState.metadata["workspace_id"] as? String
         self.previousBeaconData = nil
+        self.sdkDetails = [
+            "fastpix_embed" : "fastpix-ios-core",
+            "fastpix_embed_version" : "1.0.0",
+        ]
         self.userData = FastPixUserDefaults.getViewerCookie()
         self.getFastPixAPI = formulateBeaconUrl(workspace: self.tokenId ?? "", config: self.actionableData ?? [:])
         self.eventDispatcher = ConnectionHandler(api: self.getFastPixAPI ?? "")
@@ -65,6 +70,7 @@ public  class PlybackPulseHadler {
                 fetchedVideoState = self.dispatchNucleusEvent.getVideoData()
             }
             let mergedData = mergeDictionaries(
+                self.sdkDetails,
                 eventAttr,
                 sessionData,
                 deviceDetails,
