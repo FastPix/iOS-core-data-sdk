@@ -19,6 +19,7 @@ public class NucleusState {
     
     public var key: String
     public var metadata: [String: Any]
+    public var passableMetadata: [String: Any]
     public var data: [String: Any] = [:]
     public var lastCheckedEventTime: Int
     public var playerInitializationTime: Int
@@ -53,6 +54,7 @@ public class NucleusState {
                 fetchVideoState: @escaping () -> [String:Any]) {
         self.key = key
         self.metadata = passableMetadata["data"] as! [String : Any]
+        self.passableMetadata = passableMetadata
         self.utilMethods = commonMethods
         self.getVideoData = fetchVideoState
         self.getCurrentPlayheadTime = fetchPlayheadTime
