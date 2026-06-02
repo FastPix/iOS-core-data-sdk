@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.6]
+- Code standardization updates applied across the SDK to align with best practices and strengthen overall stability.
+
 ## [1.0.5]
 - Updated the SDK’s default metrics collection domain to improve endpoint reliability and alignment with current infrastructure.
 - Explicitly configured custom domains continue to be respected.
