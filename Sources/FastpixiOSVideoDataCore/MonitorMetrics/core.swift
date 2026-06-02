@@ -24,7 +24,7 @@ public class NucleusState {
     public var lastCheckedEventTime: Int
     public var playerInitializationTime: Int
     public var utilMethods: Any
-    public var getVideoData: () -> [String:Any]
+    public var getVideoData: () -> [String: Any]
     public var getCurrentPlayheadTime: () -> Int
     public var isVideoPlaying: Bool
     public var isVideoBuffering: Bool
@@ -51,9 +51,9 @@ public class NucleusState {
     ]
     
     public init(key: String, passableMetadata: [String: Any], fetchPlayheadTime: @escaping () -> Int,
-                fetchVideoState: @escaping () -> [String:Any]) {
+                fetchVideoState: @escaping () -> [String: Any]) {
         self.key = key
-        self.metadata = passableMetadata["data"] as! [String : Any]
+        self.metadata = passableMetadata["data"] as! [String: Any]
         self.passableMetadata = passableMetadata
         self.utilMethods = commonMethods
         self.getVideoData = fetchVideoState
@@ -65,13 +65,13 @@ public class NucleusState {
         self.isVideoErrorOccured = false
         self.playerDestroyed = false
         self.data = [
-            "player_sequence_number": 1, 
+            "player_sequence_number": 1,
             "view_sequence_number": 1,
             "player_instance_id": commonMethods.getUUID().lowercased(),
             "beacon_domain": (passableMetadata["beaconDomain"] as? String) ?? "anlytix.io",
             "workspace_id": (self.metadata["workspace_id"] as? String) ?? "workspaceId"
         ]
-
+        
         self.lastCheckedEventTime = 0
         self.dispatchEvent(event: "configureView", eventmetadata: [:])
         
@@ -85,12 +85,12 @@ public class NucleusState {
         
         self.data["event_name"] = event
         self.data["viewer_timestamp"] = currentTime
-        if (event != "viewCompleted") {
+        if event != "viewCompleted" {
             self.data.merge(eventmetadata) { (_, new) in new }
             self.data.merge(getCurrentVideoState) { (_, new) in new }
         }
         
-        if (event == "configureView") {
+        if event == "configureView" {
             self.playerDestroyed = false
             refreshViewData()
             refreshVideoData()
@@ -103,7 +103,7 @@ public class NucleusState {
         if event == "variantChanged" {
             self.data["video_source_bitrate"] = eventmetadata["video_source_bitrate"] ?? self.data["video_source_bitrate"]
         }
-
+        
         playbackFailureHandler.processEvent(nucleusState: self, metadata: eventmetadata)
         seekingHandler.processEvent(nucleusState: self)
         requestMetricsHandler.processEvent(nucleusState: self, metadata: eventmetadata)
@@ -116,12 +116,12 @@ public class NucleusState {
         bufferProcessorHandler.processEvent(nucleusState: self)
         startupMetricsHandler.processEvent(nucleusState: self)
         
-        if (event == "destroy") {
+        if event == "destroy" {
             demolishView()
             dispatchEvent(event: "configureView", eventmetadata: [:])
         }
         
-        if (mapEvents.contains(event)) {
+        if mapEvents.contains(event) {
             appendVideoState()
             validateData()
             filterData(eventName: event)
@@ -135,13 +135,11 @@ public class NucleusState {
     }
     
     func dispatchEvent(event: String, eventmetadata: [String: Any]) {
-        if (event == "play") {
-            if (self.data["view_start"] == nil) {
-                emitEvents(event: "viewBegin", eventmetadata: ["view_start" : Int(Date().timeIntervalSince1970 * 1000)])
-            }
+        if event == "play" && self.data["view_start"] == nil {
+            emitEvents(event: "viewBegin", eventmetadata: ["view_start": Int(Date().timeIntervalSince1970 * 1000)])
         }
-        
-        if (event == "videoChange") {
+
+        if event == "videoChange" {
             demolishView()
             dispatchEvent(event: "configureView", eventmetadata: eventmetadata)
         }
@@ -149,9 +147,7 @@ public class NucleusState {
     }
     
     func demolishView() {
-        if self.playerDestroyed as? Bool ?? false {
-            return
-        }
+        guard !playerDestroyed else { return }
         
         self.playerDestroyed = true
         
@@ -228,14 +224,11 @@ public class NucleusState {
     }
     
     func handlePulseEvent(event: [String: Any]) {
-        guard let playerPaused = event["player_is_paused"] as? Bool,
-              let errorStatus = self.isVideoErrorOccured as? Bool else {
-            return
-        }
+        guard let playerPaused = event["player_is_paused"] as? Bool else { return }
         
         self.throbInterval?.invalidate()
         
-        if !errorStatus {
+        if !isVideoErrorOccured {
             self.throbInterval = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false) { [weak self] _ in
                 if !playerPaused {
                     self?.emitPulse()
@@ -247,15 +240,12 @@ public class NucleusState {
     func emitPulse() {
         dispatchEvent(event: "pulse", eventmetadata: [:])
     }
-
+    
     deinit {
-        // Remove observer for app termination to avoid potential retain cycles or memory leaks
         NotificationCenter.default.removeObserver(self, name: UIApplication.willTerminateNotification, object: nil)
-        
-        // Remove observer for screen disconnection
         NotificationCenter.default.removeObserver(self, name: UIScreen.didDisconnectNotification, object: nil)
     }
-
+    
     func refreshViewData() {
         self.data.keys.forEach { key in
             if key.hasPrefix("view_") {
@@ -271,7 +261,8 @@ public class NucleusState {
                 self.data.removeValue(forKey: key)
             }
         }
-    }}
+    }
+}
 
 public class FastpixMetrix {
     
@@ -284,13 +275,12 @@ public class FastpixMetrix {
     public func configure(key: String,
                           passableMetadata: [String: Any],
                           fetchPlayheadTime: @escaping () -> Int,
-                          fetchVideoState: @escaping () -> [String:Any]) {
+                          fetchVideoState: @escaping () -> [String: Any]) {
         if playerInitKey[key] == nil {
             playerInitKey[key] = NucleusState(key: key, passableMetadata: passableMetadata, fetchPlayheadTime: fetchPlayheadTime, fetchVideoState: fetchVideoState)
         }
     }
     
-    /// **Dispatch an event to a specific player instance**
     public func dispatch(key: String, event: String, metadata: [String: Any]) {
         if let nucleusInstance = playerInitKey[key] {
             nucleusInstance.dispatchEvent(event: event, eventmetadata: metadata)

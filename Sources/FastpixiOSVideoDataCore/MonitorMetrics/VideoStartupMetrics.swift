@@ -1,6 +1,6 @@
 import Foundation
 
-public  class VideoStartupMetricsHandler {
+public class VideoStartupMetricsHandler {
     
     public var dispatchNucleusEvent: NucleusState
     public var viewTimeToFirstFrame: Int = 0
@@ -15,7 +15,7 @@ public  class VideoStartupMetricsHandler {
             return
         }
         
-        self.dispatchNucleusEvent = nucleusState  // Update with the latest state
+        self.dispatchNucleusEvent = nucleusState
         let timestamp = nucleusState.data["viewer_timestamp"] as? Int ?? 0
         switch eventName {
         case "playing":
@@ -29,16 +29,16 @@ public  class VideoStartupMetricsHandler {
         }
     }
     
-    public func handleTimeToFirstFrame(timestamp: Int) {
+    public func handleTimeToFirstFrame(timestamp _: Int) {
         let currentTime = Int(Date().timeIntervalSince1970 * 1000)
         self.dispatchNucleusEvent.wallClockTime.captureCurrentWallClockTime(wallClockTimeStamp: currentTime)
         
         if self.viewTimeToFirstFrame == 0 {
-            if (self.dispatchNucleusEvent.playerInitializationTime > 0) {
-                self.dispatchNucleusEvent.data["view_time_to_first_frame"] = currentTime - (self.dispatchNucleusEvent.playerInitializationTime as? Int ?? 0 )
+            if self.dispatchNucleusEvent.playerInitializationTime > 0 {
+                self.dispatchNucleusEvent.data["view_time_to_first_frame"] = currentTime - (self.dispatchNucleusEvent.playerInitializationTime as? Int ?? 0)
             } else if (self.dispatchNucleusEvent.data["view_start"] as! Int > 0) {
-                self.dispatchNucleusEvent.data["view_time_to_first_frame"] = currentTime - (self.dispatchNucleusEvent.data["view_start"] as? Int ?? 0 )
-            } else if ((self.dispatchNucleusEvent.data["view_watch_time"] as? Int ?? 0 ) > 0) {
+                self.dispatchNucleusEvent.data["view_time_to_first_frame"] = currentTime - (self.dispatchNucleusEvent.data["view_start"] as? Int ?? 0)
+            } else if (self.dispatchNucleusEvent.data["view_watch_time"] as? Int ?? 0) > 0 {
                 self.dispatchNucleusEvent.data["view_time_to_first_frame"] = self.dispatchNucleusEvent.data["view_watch_time"]
             }
             
