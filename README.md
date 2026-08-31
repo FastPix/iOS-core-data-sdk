@@ -44,32 +44,53 @@ import FastpixiOSVideoDataCore
 
 ##  Initialize and Configure the SDK:
 
-Create an instance of FastpixMetrix and configure it with a unique player ID to track each player instance individually. The configuration method also accepts metadata as a second argument to provide additional details about the video.
+Create an instance of `FastpixMetrix` and `configure` it. The SDK is
+**player-agnostic** — it does not observe a player itself. You supply:
+
+- `key` — a unique identifier per player instance (so you can track several at once).
+- `passableMetadata` — a `["data": [...]]` dictionary describing the video and workspace.
+- `fetchPlayheadTime` — a closure returning the current playhead position **in milliseconds** (`Int`).
+- `fetchVideoState` — a closure returning the current video state as `[String: Any]`.
 
 ```swift
 let fpMetrix = FastpixMetrix()
 
 fpMetrix.configure(
-    "player1",  // Unique player identifier
-    [
+    key: "player1",  // Unique player identifier
+    passableMetadata: [
         "data": [
             "video_title": "NEW_VIDEO",       // Title of the video being played
-            "video_id": "VIDEO_ID",         // Unique identifier for the video
+            "video_id": "VIDEO_ID",           // Unique identifier for the video
             "workspace_id": "WORKSPACE_KEY",  // Workspace ID for analytics tracking
             "player_name": "Sample Player"    // Name of the video player
         ]
-    ]
+    ],
+    fetchPlayheadTime: {
+        // Return the player's current position in milliseconds.
+        Int(player.currentTime().seconds * 1000)
+    },
+    fetchVideoState: {
+        // Return the current video state. Recognized keys include:
+        // video_source_url, video_source_width, video_source_height,
+        // video_source_duration (ms), player_width, player_height,
+        // player_is_paused, player_autoplay_on.
+        [
+            "player_is_paused": player.timeControlStatus == .paused,
+            "video_source_url": "https://.../stream.m3u8"
+        ]
+    }
 )
 ```
 ## Dispatch Events:
 
-The SDK allows you to track various player-related events supported by FastPix using the dispatch function. It accepts two arguments:
+As the player's state changes, call `dispatch` to report events to FastPix. It takes:
 
-- Event Name: The event type supported by FastPix.
-- Event Metadata: Additional parameters related to the event.
+- `key` — the same player identifier you passed to `configure`.
+- `event` — the event type supported by FastPix.
+- `metadata` — additional parameters related to the event (`[:]` if none).
 
 ```swift
-fpMetrix.dispatch("EVENT_NAME", eventMetadata)
+fpMetrix.dispatch(key: "player1", event: "EVENT_NAME", metadata: eventMetadata)
 ```
 ## Example Usage:
 
@@ -79,39 +100,45 @@ import FastpixiOSVideoDataCore
 // Initialize FastpixMetrix instance for tracking video analytics
 let fpMetrix = FastpixMetrix()
 
-// Configure FastpixMetrix with a unique player identifier and metadata
+// Configure FastpixMetrix with a unique player identifier, metadata and the
+// two state closures the SDK reads from your player.
 fpMetrix.configure(
-    "player1",  // Unique player identifier
-    [   
+    key: "player1",  // Unique player identifier
+    passableMetadata: [
         "data": [
             "video_title": "NEW_VIDEO",       // Title of the video being played
-            "video_id": "VIDEO_ID",         // Unique identifier for the video
+            "video_id": "VIDEO_ID",           // Unique identifier for the video
             "workspace_id": "WORKSPACE_KEY",  // Workspace ID for analytics tracking
             "player_name": "Sample Player"    // Name of the video player
         ]
-    ]
+    ],
+    fetchPlayheadTime: { Int(player.currentTime().seconds * 1000) },
+    fetchVideoState: { ["player_is_paused": player.timeControlStatus == .paused] }
 )
 
 // MARK: - Event Dispatching
-// Fastpix supports various events such as: 
-// ["playerReady", "viewStart", "play", "playing", "pause", "seeking", "seeked", "buffering", "buffered", 
-//  "variantChanged", "error", "requestCompleted", "requestFailed", "ended", "viewCompleted", "videoChange"]
+// Fastpix supports various events such as:
+// ["playerReady", "play", "playing", "pause", "seeking", "seeked", "buffering", "buffered",
+//  "variantChanged", "error", "requestCompleted", "requestFailed", "ended", "videoChange"]
 
 // Dispatches event when video starts playing
-fpMetrix.dispatchEvent(event: "playing", metadata: [:]) 
+fpMetrix.dispatch(key: "player1", event: "playing", metadata: [:])
 
 // Dispatches event when the video is paused
-fpMetrix.dispatchEvent(event: "pause", metadata: [:])
+fpMetrix.dispatch(key: "player1", event: "pause", metadata: [:])
 
 // Dispatches event when the user seeks to a different position in the video
-fpMetrix.dispatchEvent(event: "seeking", metadata: [:])
+fpMetrix.dispatch(key: "player1", event: "seeking", metadata: [:])
 
 // Additional example: Dispatch event when video ends
-fpMetrix.dispatchEvent(event: "ended", metadata: [:])
+fpMetrix.dispatch(key: "player1", event: "ended", metadata: [:])
 
 // Additional example: Dispatch event when buffering starts
-fpMetrix.dispatchEvent(event: "buffering", metadata: [:])
+fpMetrix.dispatch(key: "player1", event: "buffering", metadata: [:])
 
 // Additional example: Dispatch event when playback error occurs (you can pass error details in metadata)
-fpMetrix.dispatchEvent(event: "error", metadata: ["player_error_code": "404", "player_error_message": "Video not found"])
+fpMetrix.dispatch(key: "player1", event: "error", metadata: ["player_error_code": "404", "player_error_message": "Video not found"])
 ```
+
+> **Full working examples:** see [`Examples/`](Examples) for runnable UIKit and
+> SwiftUI apps that wire an `AVPlayer` to this SDK end to end.
