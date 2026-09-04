@@ -42,7 +42,7 @@ Do not skip the verification steps. If an install, workspace-key, or configurati
 
 To use the SDK, make sure you have:
 
-- **Xcode** and an iOS (or tvOS) app with a video player (typically `AVPlayer`).
+- **Xcode 15 or later** (the package uses `swift-tools-version: 5.9`), and an iOS (or tvOS) app with a video player (typically `AVPlayer`).
 - A **FastPix account** and a **Workspace Key** (see [Get your Workspace Key](#get-your-workspace-key)).
 - A way to read your player's **playhead time** (in milliseconds) and **video state** - the SDK reads these through two closures you provide.
 
